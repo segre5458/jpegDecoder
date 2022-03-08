@@ -13,13 +13,8 @@ func Parse(buffer []byte) (err error) {
 
 	for loop {
 		marker := ReadBytesAsInt(r, 2)
-
-		var length int
-		var data []byte
-		if !CheckEOI(marker) {
-			length = ReadBytesAsInt(r, 2)
-			data = ReadBytes(r, length-2)
-		}
+		length := ReadBytesAsInt(r, 2)
+		data := ReadBytes(r, length-2)
 
 		switch marker {
 		case 0xffe0:
@@ -83,9 +78,10 @@ func Parse(buffer []byte) (err error) {
 			}
 			fmt.Println("Start Number:",ss,"End Number:",sr,"Ah:",ah,"Al:",al)
 			
-		case 0xffd9:
-			fmt.Println("END")
+			loop = false
 		}
 	}
+	
+
 	return err
 }
