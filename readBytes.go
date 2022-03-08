@@ -28,8 +28,8 @@ func ReadBytes(r io.Reader, n int) []byte {
 }
 
 // バイト列中の先頭nバイトをintとして読む
-func readBytesAsInt(r io.Reader, n int) int {
-	if n == 4 {
+func ReadBytesAsInt(r io.Reader, n int) int {
+	if n >= 4 {
 		return int(binary.BigEndian.Uint32(ReadBytes(r, n)))
 	} else if n == 1 {
 		return int(Byte1toint(ReadBytes(r, n)))
@@ -40,4 +40,9 @@ func readBytesAsInt(r io.Reader, n int) int {
 	} else {
 		return 0
 	}
+}
+
+// 1バイトを4ビット2つに分割しをintとして読む
+func Read4BitsAsInt(r io.Reader) (first int, second int){
+	return 0,0
 }
