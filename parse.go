@@ -16,9 +16,10 @@ func Parse(buffer []byte) (err error) {
 		marker := ReadBytesAsInt(r, 2)
 		length := ReadBytesAsInt(r, 2)
 		data := ReadBytes(r, length-2)
-		bytelength += length+2
+		bytelength += length + 2
 
 		switch marker {
+		// APP0セグメント
 		case 0xffe0:
 			app0NR := bytes.NewReader(data)
 			fmt.Println("Segment : APP0")
@@ -56,37 +57,55 @@ func Parse(buffer []byte) (err error) {
 				fmt.Println("This file has not thumbnail")
 			}
 
+		// DQTセグメント
+		case 0xffdb:
+			dqtNR := bytes.NewReader(data)
+			fmt.Println("Segment : DQT")
+			tablePrecision := make([]int, 0)
+			tableNum := make([]int, 0)
+			table := make([][]byte, 0)
+			// ベースライン方式にのみ対応
+			for i := 0; i < (length - 2)/65; i++{
+				first, second := Read4BitsAsInt(dqtNR)
+				tablePrecision = append(tablePrecision, first)
+				tableNum = append(tableNum, second)
+				table = append(table, ReadBytes(dqtNR,64))
+				fmt.Println("TableNum:",tableNum[i],"Precision:",tablePrecision[i],"table:",table[i])
+			}
+
+
+		// SOSセグメント
 		case 0xffda:
 			sosNR := bytes.NewReader(data)
 			fmt.Println("Segment : SOS")
 			componentnum := ReadBytesAsInt(sosNR, 1)
-			cs := make([]int,0)
-			td := make([]int,0)
-			ta := make([]int,0)
-			for i:=0; i<componentnum; i++{
-				cs = append(cs,ReadBytesAsInt(sosNR,1))
-				first,second := Read4BitsAsInt(sosNR)
-				td = append(td,first)
+			cs := make([]int, 0)
+			td := make([]int, 0)
+			ta := make([]int, 0)
+			for i := 0; i < componentnum; i++ {
+				cs = append(cs, ReadBytesAsInt(sosNR, 1))
+				first, second := Read4BitsAsInt(sosNR)
+				td = append(td, first)
 				ta = append(ta, second)
 			}
-			ss := ReadBytesAsInt(sosNR,1)
-			sr := ReadBytesAsInt(sosNR,1)
-			first,second := Read4BitsAsInt(sosNR)
+			ss := ReadBytesAsInt(sosNR, 1)
+			sr := ReadBytesAsInt(sosNR, 1)
+			first, second := Read4BitsAsInt(sosNR)
 			ah := first
 			al := second
-			fmt.Println("Component Number:",componentnum)
-			for i:=0; i<componentnum; i++{
-				fmt.Println("Component No",i,"ID:",cs[i],"DC Number:",td[i],"AC Number:",ta[i])
+			fmt.Println("Component Number:", componentnum)
+			for i := 0; i < componentnum; i++ {
+				fmt.Println("Component No", i, "ID:", cs[i], "DC Number:", td[i], "AC Number:", ta[i])
 			}
-			fmt.Println("Start Number:",ss,"End Number:",sr,"Ah:",ah,"Al:",al)
-			
+			fmt.Println("Start Number:", ss, "End Number:", sr, "Ah:", ah, "Al:", al)
+
 			loop = false
 		}
 	}
-	
-	imgData := ReadBytes(r,len(buffer) - 2 - bytelength)
-	fmt.Println("imgData:",imgData)
-	CheckEOI(ReadBytesAsInt(r,2))
+
+	imgData := ReadBytes(r, len(buffer)-2-bytelength)
+	fmt.Println("imgData:", imgData)
+	CheckEOI(ReadBytesAsInt(r, 2))
 
 	return err
 }
