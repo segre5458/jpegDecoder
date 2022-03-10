@@ -10,11 +10,13 @@ func Parse(buffer []byte) (err error) {
 	CheckSOI(ReadBytesAsInt(r, 2))
 
 	loop := true
+	bytelength := 2
 
 	for loop {
 		marker := ReadBytesAsInt(r, 2)
 		length := ReadBytesAsInt(r, 2)
 		data := ReadBytes(r, length-2)
+		bytelength += length+2
 
 		switch marker {
 		case 0xffe0:
@@ -82,6 +84,9 @@ func Parse(buffer []byte) (err error) {
 		}
 	}
 	
+	imgData := ReadBytes(r,len(buffer) - 2 - bytelength)
+	fmt.Println("imgData:",imgData)
+	CheckEOI(ReadBytesAsInt(r,2))
 
 	return err
 }

@@ -11,12 +11,10 @@ func CheckSOI(b int){
 	}
 }
 
-func CheckEOI(b int)(f bool){
-	if b != 0xffd9{
-		f = false
-	} else{
-		f = true
+func CheckEOI(b int){
+	if b == 0xffd9{
+		fmt.Println("End")
+	}else{
+		fmt.Println("Not End")
 	}
-
-	return f
 }
