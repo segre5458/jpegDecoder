@@ -44,5 +44,6 @@ func ReadBytesAsInt(r io.Reader, n int) int {
 
 // 1バイトを4ビット2つに分割しをintとして読む
 func Read4BitsAsInt(r io.Reader) (first int, second int){
+	_ = ReadBytes(r,1)
 	return 0,0
 }

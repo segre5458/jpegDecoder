@@ -11,6 +11,21 @@ func Parse(buffer []byte) (err error) {
 
 	loop := true
 	bytelength := 2
+	tableNumber := 0
+
+	tc := make([]int, 0)
+	tn := make([]int, 0)
+	l := make([][]int, 16)
+	for i := range l {
+		l[i] = make([]int, 0)
+	}
+	v := make([][][]int, 16)
+	for i := range v {
+		v[i] = make([][]int, 16)
+		for j := range v[i] {
+			v[i][j] = make([]int, 0)
+		}
+	}
 
 	for loop {
 		marker := ReadBytesAsInt(r, 2)
@@ -73,6 +88,36 @@ func Parse(buffer []byte) (err error) {
 				fmt.Println("TableNum:", tableNum[i], "Precision:", tablePrecision[i], "table:", table[i])
 			}
 
+		// DHTセグメント
+		case 0xffc4:
+			dhtNR := bytes.NewReader(data)
+			fmt.Println("Segment : DHT", "Table:", tableNumber)
+
+			lp := true
+			for lp {
+				len := 19
+				first, second := Read4BitsAsInt(dhtNR)
+				tc = append(tc, first)
+				tn = append(tn, second)
+				for i := 0; i < 16; i++ {
+					lnum := ReadBytesAsInt(dhtNR, 1)
+					l[tableNumber] = append(l[tableNumber], lnum)
+					len += lnum
+				}
+				for i := 0; i < 16; i++ {
+					for k := 0; k < l[tableNumber][i]; k++ {
+						v[tableNumber][i] = append(v[tableNumber][i], ReadBytesAsInt(dhtNR, 1))
+					}
+				}
+
+				fmt.Println("Table Class:", tc[tableNumber], "Table Number:", tn[tableNumber])
+				tableNumber++
+
+				if len == length {
+					lp = false
+				}
+			}
+
 		// SOF0セグメント
 		case 0xffc0:
 			sofNR := bytes.NewReader(data)
@@ -81,18 +126,18 @@ func Parse(buffer []byte) (err error) {
 			heightSize := ReadBytesAsInt(sofNR, 2)
 			widthSize := ReadBytesAsInt(sofNR, 2)
 			elementNum := ReadBytesAsInt(sofNR, 1)
-			fmt.Println("Element Precision:",elementPrecision,"Image Size Height:",heightSize,"Width:",widthSize)
-			cn := make([]int,0)
-			hn := make([]int,0)
-			vn := make([]int,0)
-			tqn := make([]int,0)
+			fmt.Println("Element Precision:", elementPrecision, "Image Size Height:", heightSize, "Width:", widthSize)
+			cn := make([]int, 0)
+			hn := make([]int, 0)
+			vn := make([]int, 0)
+			tqn := make([]int, 0)
 			for i := 0; i < elementNum; i++ {
-				cn = append(cn, ReadBytesAsInt(sofNR,1))
-				first,second := Read4BitsAsInt(sofNR)
+				cn = append(cn, ReadBytesAsInt(sofNR, 1))
+				first, second := Read4BitsAsInt(sofNR)
 				hn = append(hn, first)
 				vn = append(vn, second)
-				tqn = append(tqn, ReadBytesAsInt(sofNR,1))
-				fmt.Println("Element No.",i,"ID:",cn[i],"Horizontal Level;",hn[i],"Vertical Level:",vn[i],"Table Number:",tqn[i])
+				tqn = append(tqn, ReadBytesAsInt(sofNR, 1))
+				fmt.Println("Element No.", i, "ID:", cn[i], "Horizontal Level;", hn[i], "Vertical Level:", vn[i], "Table Number:", tqn[i])
 			}
 
 		// SOSセグメント
