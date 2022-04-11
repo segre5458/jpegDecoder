@@ -1,8 +1,11 @@
 package main
 
-import(
-	"io"
+import (
 	"encoding/binary"
+	"fmt"
+	"io"
+	"strconv"
+	// "strconv"
 )
 
 // 1バイト文字をintに変換
@@ -43,7 +46,34 @@ func ReadBytesAsInt(r io.Reader, n int) int {
 }
 
 // 1バイトを4ビット2つに分割しをintとして読む
-func Read4BitsAsInt(r io.Reader) (first int, second int){
-	_ = ReadBytes(r,1)
-	return 0,0
+func Read4BitsAsInt(r io.Reader) (first int, second int) {
+	p := ReadBytesAsInt(r, 1)
+	s := fmt.Sprintf("%x", p)
+	if(len(s) == 1){
+		s = "0" + s
+	}
+	first = dec2hex(string(s[0]))
+	second = dec2hex(string(s[1]))
+	fmt.Println("first",first,"second",second)
+	return first,second
+}
+
+func dec2hex(str string)(num int){
+	switch str{
+	case "0","1","2","3","4","5","6","7","8","9":
+		num,_ = strconv.Atoi(str)
+	case "a":
+		num = 10
+	case "b":
+		num = 11
+	case "c":
+		num = 12
+	case "d":
+		num = 13
+	case "e":
+		num = 14
+	case "f":
+		num = 15
+	}
+	return num
 }

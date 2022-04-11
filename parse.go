@@ -85,6 +85,7 @@ func Parse(buffer []byte) (err error) {
 				tablePrecision = append(tablePrecision, first)
 				tableNum = append(tableNum, second)
 				table = append(table, ReadBytes(dqtNR, 64))
+				fmt.Println("first:",first,"second:",second)
 				fmt.Println("TableNum:", tableNum[i], "Precision:", tablePrecision[i], "table:", table[i])
 			}
 
