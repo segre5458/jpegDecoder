@@ -19,11 +19,18 @@ func Parse(buffer []byte) (err error) {
 	for i := range l {
 		l[i] = make([]int, 0)
 	}
-	v := make([][][]int, 16)
-	for i := range v {
-		v[i] = make([][]int, 16)
-		for j := range v[i] {
-			v[i][j] = make([]int, 0)
+	vdc := make([][][]int, 16)
+	for i := range vdc {
+		vdc[i] = make([][]int, 16)
+		for j := range vdc[i] {
+			vdc[i][j] = make([]int, 0)
+		}
+	}
+	vac := make([][][]int, 16)
+	for i := range vac {
+		vac[i] = make([][]int, 16)
+		for j := range vac[i] {
+			vac[i][j] = make([]int, 0)
 		}
 	}
 
@@ -85,7 +92,6 @@ func Parse(buffer []byte) (err error) {
 				tablePrecision = append(tablePrecision, first)
 				tableNum = append(tableNum, second)
 				table = append(table, ReadBytes(dqtNR, 64))
-				fmt.Println("first:",first,"second:",second)
 				fmt.Println("TableNum:", tableNum[i], "Precision:", tablePrecision[i], "table:", table[i])
 			}
 
@@ -105,13 +111,36 @@ func Parse(buffer []byte) (err error) {
 					l[tableNumber] = append(l[tableNumber], lnum)
 					len += lnum
 				}
-				for i := 0; i < 16; i++ {
-					for k := 0; k < l[tableNumber][i]; k++ {
-						v[tableNumber][i] = append(v[tableNumber][i], ReadBytesAsInt(dhtNR, 1))
+				if tc[tableNumber] == 0 {
+				// DC成分
+					for i := 0; i < 16; i++ {
+						for k := 0; k < l[tableNumber][i]; k++ {
+							vdc[tableNumber][i] = append(vdc[tableNumber][i], ReadBytesAsInt(dhtNR, 1))
+						}
+					}
+				} else if tc[tableNumber] == 1 {
+					// AC成分
+					for i := 0; i < 16; i++ {
+						for k := 0; k < l[tableNumber][i]; k++ {
+							runlength, databit := Read4BitsAsInt(dhtNR)
+							vac[tableNumber][i] = append(vac[tableNumber][i], runlength)
+							vac[tableNumber][i] = append(vac[tableNumber][i], databit)
+						}
 					}
 				}
 
 				fmt.Println("Table Class:", tc[tableNumber], "Table Number:", tn[tableNumber])
+				if tc[tableNumber] == 0 {
+				// DC成分
+					for i := 0; i < 16; i++ {
+						fmt.Println("Table:", i,"BitNum:",l[tableNumber][i], "DataBitNum:",vdc[tableNumber][i])
+					}
+				} else if tc[tableNumber] == 1{
+				// AC成分
+					for i:= 0; i<16; i++{
+						fmt.Println("Table", i,"BitNum:",l[tableNumber][i], "RunLengthNum:",vac[tableNumber][i],"DataBitNum:",vac[tableNumber][i])
+					}
+				}
 				tableNumber++
 
 				if len == length {

@@ -54,7 +54,6 @@ func Read4BitsAsInt(r io.Reader) (first int, second int) {
 	}
 	first = dec2hex(string(s[0]))
 	second = dec2hex(string(s[1]))
-	fmt.Println("first",first,"second",second)
 	return first,second
 }
 
