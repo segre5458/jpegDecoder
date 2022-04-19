@@ -133,12 +133,12 @@ func Parse(buffer []byte) (err error) {
 				if tc[tableNumber] == 0 {
 				// DC成分
 					for i := 0; i < 16; i++ {
-						fmt.Println("Table:", i,"BitNum:",l[tableNumber][i], "DataBitNum:",vdc[tableNumber][i])
+						fmt.Println("Table:", i+1,"BitNum:",l[tableNumber][i], "DataBitNum:",vdc[tableNumber][i])
 					}
 				} else if tc[tableNumber] == 1{
 				// AC成分
 					for i:= 0; i<16; i++{
-						fmt.Println("Table", i,"BitNum:",l[tableNumber][i], "RunLengthNum:",vac[tableNumber][i],"DataBitNum:",vac[tableNumber][i])
+						fmt.Println("Table", i+1,"BitNum:",l[tableNumber][i], "RunLengthNum:",vac[tableNumber][i],"DataBitNum:",vac[tableNumber][i])
 					}
 				}
 				tableNumber++
